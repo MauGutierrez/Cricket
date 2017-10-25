@@ -1,0 +1,26 @@
+program suma_matriz
+
+int A = 10, B = 10, index1, index2, index3, index4;
+arrint arreglo1[A][B], arreglo2[A][B], arregloResultante[A][B];
+
+function suma_matriz(){
+	for (index1 = 0; index1 < 10; index1 = index1 + 1){
+		for (index2 = 0; index2 < 10; index2 = index2 + 1){
+			arregloResultante[index1][index2] = arreglo1[index1][index2]+arreglo2[index1][index2];
+		}
+	}
+}
+
+function imprime_matriz(){
+	for (index3 = 0; index < 10; index3 = index3 + 1){
+		for (index4 = 0; index < 10; index4 = index4 + 1){
+			write(arregloResultante[index3][index4]);
+		}
+	}
+}
+
+main(){
+	call suma_matriz();
+	call imprime_matriz();	
+}
+.

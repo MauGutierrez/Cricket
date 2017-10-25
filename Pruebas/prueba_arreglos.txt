@@ -1,0 +1,9 @@
+program prueba
+
+int index, index2, index3;
+arrint arreglo1[10];
+
+main(){
+	
+}
+.
