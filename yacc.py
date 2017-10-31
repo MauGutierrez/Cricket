@@ -5,7 +5,7 @@ from lexico import tokens
 error 				= None 	#Variable para saber si hay error 
 contador_repetidas	= 0  	#Contador para las variables repetidas
 contador			= 0  	#Contador para saber cuantas variables hay
-Name				= {} 	#Diccionario para guardar las variables
+Name				= {} 	#Diccionario para guardar las variables con su valor inicial
 Name_tipos			= {}	#Diccionario para guardar las variables con su tipo
 Name_repetidas		= {}	#Diccionario para guardar las variables repetidas
 index_repetidas		= 0		#Index del diccionario de las palabras repetidas
@@ -26,6 +26,8 @@ pila_saltos			= []
 aux_variable1		= None
 aux_variable2		= None
 print_type			= 0
+ciclo_while 		= None
+variables_string	= None
 
 
 def p_programa(p):
@@ -35,7 +37,7 @@ def p_programa(p):
 	global contador_cuadruplo
 	cuadruplo.append(['END'])
 	print(cuadruplo)
-	#print(Name)
+	
 	i = 0
 	contador_tipos = 0
 	while True:
@@ -62,22 +64,35 @@ def p_programa(p):
 					if (pila_tipos[contador_tipos] == ['int']):
 						if aux_variable1 == True:
 							op1 = int(float(variable1))
+						elif aux[1] in Name:
+							op1 = int(float(Name[aux[1]]))
 						else:
 							op1 = int(float(aux[1]))
+						
 						if aux_variable2 == True:
 							op2 = int(float(variable2))
+						elif aux[2] in Name:
+							op2 = int(float(Name[aux[2]]))
 						else:
 							op2 = int(float(aux[2]))
+
 					elif (pila_tipos[contador_tipos] == ['float']):
 						if aux_variable1 == True:
 							op1 = float(variable1)
+						elif aux[1] in Name:
+							op1 = float(Name[aux[1]])
 						else:
 							op1 = float(aux[1])
+						
 						if aux_variable2 == True:
 							op2 = float(variable2)
+						elif aux[2] in Name:
+							op2 = float(Name[aux[2]])
 						else:
 							op2 = float(aux[2])
-					contador_tipos += 1
+
+					if not ciclo_while:
+						contador_tipos += 1
 					ans = op1 + op2
 					for index in range(len(aux)):
 						dic_temp[aux[3]] = ans
@@ -87,23 +102,35 @@ def p_programa(p):
 					if (pila_tipos[contador_tipos] == ['int']):
 						if aux_variable1 == True:
 							op1 = int(float(variable1))
+						elif aux[1] in Name:
+							op1 = int(float(Name[aux[1]]))
 						else:
 							op1 = int(float(aux[1]))
+						
 						if aux_variable2 == True:
 							op2 = int(float(variable2))
+						elif aux[2] in Name:
+							op2 = int(float(Name[aux[2]]))
 						else:
 							op2 = int(float(aux[2]))
+
 					elif (pila_tipos[contador_tipos] == ['float']):
 						if aux_variable1 == True:
 							op1 = float(variable1)
+						elif aux[1] in Name:
+							op1 = float(Name[aux[1]])
 						else:
 							op1 = float(aux[1])
+						
 						if aux_variable2 == True:
 							op2 = float(variable2)
+						elif aux[2] in Name:
+							op2 = float(Name[aux[2]])
 						else:
 							op2 = float(aux[2])
 					
-					contador_tipos += 1
+					if not ciclo_while:
+						contador_tipos += 1
 					ans = op1 - op2
 					for index in range(len(aux)):
 						dic_temp[aux[3]] = ans
@@ -113,23 +140,35 @@ def p_programa(p):
 					if (pila_tipos[contador_tipos] == ['int']):
 						if aux_variable1 == True:
 							op1 = int(float(variable1))
+						elif aux[1] in Name:
+							op1 = int(float(Name[aux[1]]))
 						else:
 							op1 = int(float(aux[1]))
+						
 						if aux_variable2 == True:
 							op2 = int(float(variable2))
+						elif aux[2] in Name:
+							op2 = int(float(Name[aux[2]]))
 						else:
 							op2 = int(float(aux[2]))
+
 					elif (pila_tipos[contador_tipos] == ['float']):
 						if aux_variable1 == True:
 							op1 = float(variable1)
+						elif aux[1] in Name:
+							op1 = float(Name[aux[1]])
 						else:
 							op1 = float(aux[1])
+						
 						if aux_variable2 == True:
 							op2 = float(variable2)
+						elif aux[2] in Name:
+							op2 = float(Name[aux[2]])
 						else:
 							op2 = float(aux[2])
 					
-					contador_tipos += 1
+					if not ciclo_while:
+						contador_tipos += 1
 					ans = op1 * op2
 					for index in range(len(aux)):
 						dic_temp[aux[3]] = ans
@@ -146,7 +185,8 @@ def p_programa(p):
 						else:
 							op2 = float(aux[2])
 					
-					contador_tipos += 1
+					if not ciclo_while:
+						contador_tipos += 1
 					ans = op1 / op2
 					for index in range(len(aux)):
 						dic_temp[aux[3]] = ans
@@ -177,20 +217,36 @@ def p_programa(p):
 					Name[aux[3]] = variable1
 
 			elif (aux[index] == 'print'):
-				for index1 in Name:
-					if (aux[3] == index1):
-						continua = True
-						break
-					else:
-						continua = False
-				if (not continua):
+				if (variables_string):
+					print(aux[3])
+				else:
+					for index1 in Name:
+						if (aux[3] == index1):
+							continua = True
+							break
+						else:
+							continua = False
+					if (not continua):
+						print('Error. Variable ' + aux[3] + ' no declarada previamente')
+						exit(1)
+					print(Name[aux[3]])
+
+			elif (aux[index] == 'read'):
+				if aux[3] not in Name:
 					print('Error. Variable ' + aux[3] + ' no declarada previamente')
 					exit(1)
-				print(Name[aux[3]])
+				Name[aux[3]] = raw_input('> ')
 
 			elif (aux[index] == '>'):
-				op1 = float(aux[1])
-				op2 = float(aux[2])
+				if aux[1] in Name:
+					op1 = float(Name[aux[1]])
+				else:
+					op1 = float(aux[1])
+
+				if aux[2] in Name:
+					op2 = float(Name[aux[2]])
+				else:
+					op2 = float(aux[2])
 				
 				ans = op1 > op2
 				for index in range(len(aux)):
@@ -198,8 +254,15 @@ def p_programa(p):
 					break
 
 			elif (aux[index] == '<'):
-				op1 = float(aux[1])
-				op2 = float(aux[2])
+				if aux[1] in Name:
+					op1 = float(Name[aux[1]])
+				else:
+					op1 = float(aux[1])
+
+				if aux[2] in Name:
+					op2 = float(Name[aux[2]])
+				else:
+					op2 = float(aux[2])
 				
 				ans = op1 < op2
 				for index in range(len(aux)):
@@ -207,8 +270,15 @@ def p_programa(p):
 					break
 
 			elif (aux[index] == '!='):
-				op1 = float(aux[1])
-				op2 = float(aux[2])
+				if aux[1] in Name:
+					op1 = float(Name[aux[1]])
+				else:
+					op1 = float(aux[1])
+
+				if aux[2] in Name:
+					op2 = float(Name[aux[2]])
+				else:
+					op2 = float(aux[2])
 				
 				ans = op1 != op2
 				for index in range(len(aux)):
@@ -216,17 +286,31 @@ def p_programa(p):
 					break
 
 			elif (aux[index] == '=='):
-				op1 = float(aux[1])
-				op2 = float(aux[2])
-				
+				if aux[1] in Name:
+					op1 = float(Name[aux[1]])
+				else:
+					op1 = float(aux[1])
+
+				if aux[2] in Name:
+					op2 = float(Name[aux[2]])
+				else:
+					op2 = float(aux[2])
+
 				ans = op1 == op2
 				for index in range(len(aux)):
 					dic_temp[aux[3]] = ans
 					break
 
 			elif (aux[index] == '>='):
-				op1 = float(aux[1])
-				op2 = float(aux[2])
+				if aux[1] in Name:
+					op1 = float(Name[aux[1]])
+				else:
+					op1 = float(aux[1])
+
+				if aux[2] in Name:
+					op2 = float(Name[aux[2]])
+				else:
+					op2 = float(aux[2])
 				
 				ans = op1 >= op2
 				for index in range(len(aux)):
@@ -234,8 +318,15 @@ def p_programa(p):
 					break
 
 			elif (aux[index] == '<='):
-				op1 = float(aux[1])
-				op2 = float(aux[2])
+				if aux[1] in Name:
+					op1 = float(Name[aux[1]])
+				else:
+					op1 = float(aux[1])
+
+				if aux[2] in Name:
+					op2 = float(Name[aux[2]])
+				else:
+					op2 = float(aux[2])
 				
 				ans = op1 <= op2
 				for index in range(len(aux)):
@@ -269,7 +360,6 @@ def p_programa(p):
 					op2 = aux[2]
 				
 				ans = op1 and op2
-				print(ans)
 				for index in range(len(aux)):
 					dic_temp[aux[3]] = ans
 					break
@@ -301,7 +391,6 @@ def p_programa(p):
 					op2 = aux[2]
 				
 				ans = op1 or op2
-				print(ans)
 				for index in range(len(aux)):
 					dic_temp[aux[3]] = ans
 					break
@@ -324,7 +413,6 @@ def p_programa(p):
 
 		i += 1
 		if cuadruplo[i] == ['END']:
-			print(dic_temp)
 			break
 
 def p_var_declaration(p):
@@ -391,12 +479,18 @@ def p_print_process(p):
 	'''print_process : PRINT LPAREN print_1 RPAREN SEMMICOLON'''
 
 def p_print_1(p):
-	'''print_1 : id print_aux_1 print_prima_1'''
+	'''print_1 : id print_aux_1 print_prima_1
+			   | string_type print_aux_2 print_prima_1'''
 
 def p_print_aux_1(p):
 	'''print_aux_1 : '''
 	global print_type
 	print_type = 1
+
+def p_print_aux_2(p):
+	'''print_aux_2 : '''
+	global print_type
+	print_type = 2
 
 def p_print_prima_1(p):
 	'''print_prima_1 : COMMA print_prima_2 print_1
@@ -409,9 +503,14 @@ def p_print_prima_2(p):
 	if (print_type == 1):
 		cuadruplo.append(['print', ' ', ' ', pila_operandos.pop()[0]])
 		contador_cuadruplo += 1
+	elif (print_type == 2):
+		cuadruplo.append(['print', ' ', ' ', pila_operandos.pop()[0]])
+		contador_cuadruplo += 1
 
 def p_read_process(p):
 	'''read_process : READ LPAREN sexp RPAREN SEMMICOLON'''
+	global contador_cuadruplo
+	cuadruplo.append(['read', ' ', ' ', pila_operandos.pop()[0]])
 
 def p_id_asignacion(p):
 	'''id_asignacion : id id_asignacion_prima'''
@@ -430,7 +529,7 @@ def p_ciclo_for(p):
 
 #Ciclo while
 def p_ciclo_while(p):
-	'''ciclo_while : WHILE ciclo_while_1 LPAREN sexp RPAREN LKEY estatuto RKEY ciclo_while_2'''
+	'''ciclo_while : WHILE ciclo_while_1 LPAREN sexp RPAREN ciclo_while_2 LKEY estatuto RKEY'''
 	global cuadruplo
 	global contador_cuadruplo
 	global ciclo_while
@@ -539,7 +638,7 @@ def p_cuadruplo_1(p):
 					temporales.append(operando2)
 				pila_operandos.append([resultado, tipo])
 			else:
-				print('Error')
+				print('Error4')
 				exit(1)
 
 
@@ -551,57 +650,57 @@ def p_sexprima(p):
 def p_expression(p):
 	'''expression : cuadruplo_2 expressionp'''
 
-def p_expression(p): 
-    '''expression : exp'''
+def p_cuadruplo_2(p): 
+    '''cuadruplo_2 : exp'''
     if pila_operadores:
 		if pila_operadores[-1] == '>' or pila_operadores[-1] == '<' or pila_operadores[-1] == '>=' or pila_operadores[-1] == '<=' or pila_operadores[-1] == '==' or pila_operadores[-1] == '!=':
 			global cuadruplo
-    		global contador_cuadruplo
-    		operador = pila_operadores.pop()
-    		operando1 = pila_operandos.pop()
-    		operando2 = pila_operandos.pop()
-    		for index in Name:
-    			if operando1[0] == index:
-    				for index2 in Name_tipos:
-    					if operando1[0] == index2:
-    						pila_operandos.append([Name[index], Name_tipos[index2]])
-    						operando1 = pila_operandos.pop()
-    		
-    		for index in Name:
-    			if operando2[0] == index:
-    				for index2 in Name_tipos:
-    					if operando2[0] == index2:
-    						pila_operandos.append([Name[index], Name_tipos[index2]])
-    						operando2 = pila_operandos.pop()
-    		tipo = reglas.get((operando2[1], operador, operando1[1]), 'Error')
-    		if tipo != 'Error':
-    			resultado = temporales.pop()
-    			cuadruplo.append([operador, operando2[0], operando1[0], resultado])
-    			contador_cuadruplo += 1
-    			if (operando1 == 'T1' or operando1 == 'T2' or operando1 == 'T3' or operando1 == 'T4' or operando1 == 'T5' or operando1 == 'T6' or
-    				operando1 == 'T7' or operando1 == 'T8' or operando1 == 'T9' or operando1 == 'T10' or operando1 == 'T11' or operando1 == 'T12' or 
-    				operando1 == 'T13' or operando1 == 'T14' or operando1 == 'T15' or operando1 == 'T16' or operando1 == 'T17' or operando1 == 'T18' or
-    				operando1 == 'T19' or operando1 == 'T20'):
-    				temporales.append(operando1)
-    			elif (operando2 == 'T1' or operando2 == 'T2' or operando2 == 'T3' or operando2 == 'T4' or operando2 == 'T5' or operando2 == 'T6' or
-    				operando2 == 'T7' or operando2 == 'T8' or operando2 == 'T9' or operando2 == 'T10' or operando2 == 'T11' or operando2 == 'T12' or 
-    				operando2 == 'T13' or operando2 == 'T14' or operando2 == 'T15' or operando2 == 'T16' or operando2 == 'T17' or operando2 == 'T18' or
-    				operando2 == 'T19' or operando2 == 'T20'):
-    				temporales.append(operando2)
-    			pila_operandos.append([resultado, tipo])
-    		else:
-    			print('Error')
-    			exit(1)
+			global contador_cuadruplo
+			operador = pila_operadores.pop()
+			operando1 = pila_operandos.pop()
+			operando2 = pila_operandos.pop()
+			for index in Name:
+				if operando1[0] == index:
+					for index2 in Name_tipos:
+						if operando1[0] == index2:
+							pila_operandos.append([index, Name_tipos[index2]])
+							operando1 = pila_operandos.pop()
+			
+			for index in Name:
+				if operando2[0] == index:
+					for index2 in Name_tipos:
+						if operando2[0] == index2:
+							pila_operandos.append([index, Name_tipos[index2]])
+							operando2 = pila_operandos.pop()
+			tipo = reglas.get((operando2[1], operador, operando1[1]), 'Error')
+			if tipo != 'Error':
+				resultado = temporales.pop()
+				cuadruplo.append([operador, operando2[0], operando1[0], resultado])
+				contador_cuadruplo += 1
+				if (operando1 == 'T1' or operando1 == 'T2' or operando1 == 'T3' or operando1 == 'T4' or operando1 == 'T5' or operando1 == 'T6' or
+					operando1 == 'T7' or operando1 == 'T8' or operando1 == 'T9' or operando1 == 'T10' or operando1 == 'T11' or operando1 == 'T12' or 
+					operando1 == 'T13' or operando1 == 'T14' or operando1 == 'T15' or operando1 == 'T16' or operando1 == 'T17' or operando1 == 'T18' or
+					operando1 == 'T19' or operando1 == 'T20'):
+					temporales.append(operando1)
+				elif (operando2 == 'T1' or operando2 == 'T2' or operando2 == 'T3' or operando2 == 'T4' or operando2 == 'T5' or operando2 == 'T6' or
+					operando2 == 'T7' or operando2 == 'T8' or operando2 == 'T9' or operando2 == 'T10' or operando2 == 'T11' or operando2 == 'T12' or 
+					operando2 == 'T13' or operando2 == 'T14' or operando2 == 'T15' or operando2 == 'T16' or operando2 == 'T17' or operando2 == 'T18' or
+					operando2 == 'T19' or operando2 == 'T20'):
+					temporales.append(operando2)
+				pila_operandos.append([resultado, tipo])
+			else:
+				print('Error')
+				exit(1)
   
 def p_expressionp(p): 
-    '''expressionp : LT push_operator exp
-                   | GT push_operator exp
-                   | LTEQ push_operator exp 
-                   | GTEQ push_operator exp
-                   | EQ push_operator exp
-                   | NEQ push_operator exp 
+    '''expressionp : LT push_operator expression
+                   | GT push_operator expression
+                   | LTEQ push_operator expression 
+                   | GTEQ push_operator expression
+                   | EQ push_operator expression
+                   | NEQ push_operator expression 
                    | empty'''
-
+ 
 def p_exp(p):
 	'''exp : cuadruplo_3 expp'''
 
@@ -618,15 +717,14 @@ def p_cuadruplo_3(p):
 				if operando1[0] == index:
 					for index2 in Name_tipos:
 						if operando1[0] == index2:
-							pila_operandos.append([Name[index], Name_tipos[index2]])
+							pila_operandos.append([index, Name_tipos[index2]])
 							operando1 = pila_operandos.pop()
 			for index in Name:
 				if operando2[0] == index:
 					for index2 in Name_tipos:
 						if operando2[0] == index2:
-							pila_operandos.append([Name[index], Name_tipos[index2]])
+							pila_operandos.append([index, Name_tipos[index2]])
 							operando2 = pila_operandos.pop()
-
 			tipo = reglas.get((operando2[1], operador, operando1[1]), 'Error')
 			if tipo != 'Error':
 				resultado = temporales.pop()
@@ -644,9 +742,10 @@ def p_cuadruplo_3(p):
 					temporales.append(operando2)
 				pila_operandos.append([resultado, tipo])
 				pila_tipos.append([tipo])
-    		else:
-    			print('Error')
-    			exit(1)
+			else:
+				print('Error2')
+				exit(1)
+
 
 def p_expp(p): 
     '''expp : PLUS push_operator exp
@@ -695,7 +794,7 @@ def p_cuadruplo_4(p):
 				pila_operandos.append([resultado, tipo])
 				pila_tipos.append([tipo])
     		else:
-    			print('Error')
+    			print('Error1')
     			exit(1)
 
 def p_termp(p): 
@@ -707,47 +806,46 @@ def p_push_operator(p):
 	'''push_operator : '''
 	global pila_operadores
 	if (p[-1]):
-		pila_operadores.append(p[-1]) 
+		pila_operadores.append(p[-1])
 
 def p_factor(p): 
     '''factor : cons
-              | LPAREN expression RPAREN'''
+              | LPAREN push_operator sexp RPAREN pop_parentesis 
+              | empty'''
+
+def p_pop_parentesis(p):
+	'''pop_parentesis : '''
+	pila_operadores.pop()
+
 
 def p_cons(p): 
-    '''cons : id
-    		| NUMINT int_type
-    		| NUMFLOAT float_type'''
+	'''cons : id
+			| NUMINT int_type
+			| NUMFLOAT float_type'''
 
 def p_int_type(p): 
-    '''int_type :'''
+    '''int_type : '''
     global pila_operandos
     pila_operandos.append([p[-1], 'int'])
 
 
 def p_float_type(p): 
-    '''float_type :'''
+    '''float_type : '''
     global pila_operandos
     pila_operandos.append([p[-1], 'float'])
 
+def p_string_type(p):
+	'''string_type : CTES'''
+	global pila_operandos
+	global variables_string
+	pila_operandos.append([p[1]])
+	variables_string = True
 
 def p_id(p): 
-    '''id : ID idp'''
-
-def p_idp(p): 
-    '''idp : LSQUARE sexp RSQUARE 
-           | LPAREN idpp RPAREN
-           | empty'''
+    '''id : ID'''
     global pila_operandos
-    res = p[-1]
-    pila_operandos.append([res])
+    pila_operandos.append(p[1])
 
-def p_idpp(p): 
-    '''idpp : sexp idppaux
-            | empty''' 
-
-def p_idppaux(p): 
-    '''idppaux : COMMA idpp 
-               | empty''' 
 
 def p_empty(p):
 	'''empty :'''
@@ -791,6 +889,6 @@ def check_error(variable):
 #	print(str(aux) + " " + var)
 
 for aux in Name:
-	var = Name[aux]
+	var = aux
 	if (check_error(var) == True):
 		print("Error. Variable " + var + " repetida")

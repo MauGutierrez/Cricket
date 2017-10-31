@@ -16,7 +16,7 @@ reserved = {
 	"arrint"	:	"ARRINT"	
 }
 
-tokens = ['NEQ', 'EQ', 'GTEQ', 'LTEQ', 'AND', 'OR', 'ID', 'NUMINT', 'NUMFLOAT', 'SEMMICOLON', 'POINT',
+tokens = ['NEQ', 'EQ', 'GTEQ', 'LTEQ', 'AND', 'OR', 'ID', 'NUMINT', 'NUMFLOAT', 'CTES','SEMMICOLON', 'POINT',
 		  'RPAREN', 'LPAREN', 'RSQUARE', 'LSQUARE', 'RKEY', 'LKEY', 'LT', 'GT', 'PLUS', 'MINUS', 'TIMES',
 		  'DIVISION', 'ASSIGN', 'COMMA'] + list(reserved.values())
 
@@ -24,6 +24,7 @@ tokens = ['NEQ', 'EQ', 'GTEQ', 'LTEQ', 'AND', 'OR', 'ID', 'NUMINT', 'NUMFLOAT', 
 t_ignore 		= ' \t'
 t_NUMINT   		= r'[0-9]+' 		#Constantes enteras
 t_NUMFLOAT   	= r'[0-9]+\.[0-9]+' #Constantes flotantes
+t_CTES			= r'".*"'			#Constantes string
 t_OR 			= r'\|\|' 			#Operador logico OR 
 t_AND 			= r'&&'   			#Operador logico AND
 t_NEQ			= r'!='				#Diferente de
