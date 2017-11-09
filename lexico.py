@@ -9,7 +9,7 @@ reserved = {
 	"print"		:	"PRINT",
 	"function"	:	"FUNCTION",
 	"main"		:	"MAIN",
-	"call"		:	"CALL",
+	"return"	:	"RETURN",
 	"program"	:	"PROGRAM",
 	"int"		:	"INT",
 	"float"		:	"FLOAT",
