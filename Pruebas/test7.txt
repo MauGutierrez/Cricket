@@ -1,0 +1,25 @@
+program prueba
+
+int a = 10;
+
+function suma(){
+	a++;
+	return;
+}
+
+function imprimir(){
+	print(a);
+	return;
+}
+
+function resta(){
+	a--;
+	return;
+}
+
+main(){
+	suma();
+	imprimir();
+	resta();
+	imprimir();
+}

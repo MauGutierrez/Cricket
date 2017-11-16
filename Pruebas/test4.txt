@@ -1,0 +1,10 @@
+program prueba
+
+int a, b = 1, c = 2;
+
+main(){
+	for (a = 0; a < 10; a++){
+		print(a);
+	}
+}
+.

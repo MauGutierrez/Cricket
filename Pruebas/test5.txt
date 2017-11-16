@@ -1,0 +1,11 @@
+program prueba
+
+int a = 10;
+
+main(){
+	while (a > 0){
+		print(a);
+		a--;
+	}
+}
+.

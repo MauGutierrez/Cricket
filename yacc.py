@@ -2,12 +2,10 @@ import ply.yacc as yacc
 from reglasSemanticas import reglas
 from lexico import tokens
 
-error 				= None 	#Variable para saber si hay error 
-contador			= 0  	#Contador para saber cuantas variables hay
-Name				= {} 	#Diccionario para guardar las variables con su valor inicial
-Name_tipos			= {}	#Diccionario para guardar las variables con su tipo
-Name_Functions		= {}	#Diccionario para guardar las funciones declaradas		
-index_repetidas		= 0		#Index del diccionario de las palabras repetidas
+Name				= {} 	#Diccionario global para guardar las variables con su valor inicial
+Name_tipos			= {}	#Diccionario global para guardar las variables con su tipo
+Name_Functions		= {}	#Diccionario para guardar las funciones declaradas	
+Name_string			= {}	#Diccionario para guardar las variables string	
 cuadruplo			= []
 pila_saltos			= []
 pila_operandos		= []
@@ -20,23 +18,25 @@ dic_temp 			= {'T1':0, 'T2':0, 'T3':0, 'T4':0, 'T5':0, 'T6':0, 'T7':0, 'T8':0, '
 					   'T11':0, 'T12':0, 'T13':0, 'T14':0, 'T15':0, 'T16':0, 'T17':0, 'T18':0, 'T19':0, 'T20':0
 					  }
 dic_tipos 			= {}
-pila_constante		= []
-pila_saltos			= []
-pila_ejecucion		= []
+var_for				= {}
+pila_retorno		= []
+arreglos_len 		= {}
+matriz_de_matrices  = []
 aux_variable1		= None
 aux_variable2		= None
 print_type			= 0
-variables_string	= None
-
 
 def p_programa(p):
-	'''programa : PROGRAM first_cuadruplo ID var_declaration function_declaration rellena_cuadruplo main_declaration POINT'''
+	'''programa : PROGRAM first_cuadruplo ID var_declaration function_declaration rellena_cuadruplo main_declaration'''
 	global aux_variable1
 	global aux_variable2
 	global contador_cuadruplo
 	cuadruplo.append(['END'])
 	print(cuadruplo)
-	print(dic_tipos)
+	#print(Name)
+	#print(arreglos_len)
+	#print(matriz_de_matrices)
+	#print(dic_tipos)
 	i = 0
 
 	while True:
@@ -164,7 +164,6 @@ def p_programa(p):
 						else:
 							op2 = float(aux[2])
 					
-					
 					ans = op1 * op2
 					for index in range(len(aux)):
 						dic_temp[aux[3]] = ans
@@ -197,6 +196,8 @@ def p_programa(p):
 					aux[1] == 'T19' or aux[1] == 'T20'):
 						
 					variable1 = dic_temp[aux[1]]
+				elif aux[1] in Name:
+					variable1 = Name[aux[1]]
 				else:
 					variable1 = aux[1]
 				for index1 in Name:
@@ -212,16 +213,13 @@ def p_programa(p):
 					Name[aux[3]] = variable1
 
 			elif (aux[index] == 'print'):
-				if (variables_string):
+				if (aux[3] not in Name and aux[3] not in Name_string):
+					print('Error. Variable ' + aux[3] + ' no declarada previamente')
+					exit(1)
+				elif(aux[3] in Name_string):
 					print(aux[3])
 				else:
-					for index1 in Name:
-						if (aux[3] == index1):
-							continua = True
-							break
-						else:
-							continua = False
-					if (not continua):
+					if (aux[3] not in Name):
 						print('Error. Variable ' + aux[3] + ' no declarada previamente')
 						exit(1)
 					print(Name[aux[3]])
@@ -408,10 +406,9 @@ def p_programa(p):
 				i = int(float(aux[3])) - 1
 
 			elif (aux[index] == 'retorno'):
-				i = pila_ejecucion.pop() - 1
+				i = pila_retorno.pop()
 
 			break
-
 		i += 1
 		if cuadruplo[i] == ['END']:
 			break
@@ -458,13 +455,39 @@ def p_variable_float_list(p):
 	Name_tipos[p[1]] = 'float'
 
 def p_variable_arrint_list(p):
-	'''variable_arrint_list : ID LSQUARE ID RSQUARE SEMMICOLON 
-					 	 	| ID LSQUARE ID RSQUARE COMMA variable_arrint_list
-					 	 	| ID LSQUARE ID RSQUARE LSQUARE ID RSQUARE SEMMICOLON
-					 	 	| ID LSQUARE ID RSQUARE LSQUARE ID RSQUARE COMMA variable_arrint_list'''
-	Name[p[1]] = 0
-	if (p[2] == '='):
-		Name[p[1]] = p[3]
+	'''variable_arrint_list : ID LSQUARE sexp RSQUARE SEMMICOLON 
+					 	 	| ID LSQUARE sexp RSQUARE COMMA variable_arrint_list
+					 	 	| ID LSQUARE sexp RSQUARE LSQUARE sexp RSQUARE SEMMICOLON
+					 	 	| ID LSQUARE sexp RSQUARE LSQUARE sexp RSQUARE COMMA variable_arrint_list'''
+	if (p[1] in Name):
+		print('Error. Variable ' + p[1] + ' repetida')
+		exit(1)
+	if (p[5] == '['): 
+		matriz_de_matrices.append([0])
+		dimension_1_2d = int(float(pila_operandos.pop()[0]))
+		dimension_2_2d = int(float(pila_operandos.pop()[0]))
+		n = 1
+		while (n < dimension_1_2d * dimension_2_2d):
+			matriz_de_matrices[len(matriz_de_matrices)-1].append(0)
+			n += 1
+		Name[p[1]] = dimension_1_2d * dimension_2_2d
+		arreglos_len[p[1]] = {
+							  'size' 	: dimension_1_2d * dimension_2_2d,
+							  'mem_dir'	: len(matriz_de_matrices)-1
+							 }
+	else:
+		matriz_de_matrices.append([0])
+		dimension_1 = int(float(pila_operandos.pop()[0]))
+		n = 1
+		while (n < dimension_1):
+			matriz_de_matrices[len(matriz_de_matrices)-1].append(0)
+			n += 1
+		Name[p[1]] = dimension_1
+		arreglos_len[p[1]] = {
+							  'size' 	: dimension_1,
+							  'mem_dir'	: len(matriz_de_matrices)-1
+							 }
+	Name_tipos[p[1]] = 'array'
 
 def p_function_declaration(p):
 	'''function_declaration : function_1 function_declaration
@@ -502,11 +525,56 @@ def p_estatuto(p):
 				| id_asignacion estatuto
 				| id SEMMICOLON estatuto
 				| ret_process estatuto
+				| plus_plus estatuto
+				| minus_minus estatuto
 				| empty'''
+
+
+def p_plus_plus(p):
+	'''plus_plus : id plus_plus_continua'''
+
+def p_plus_plus_continua(p):
+	'''plus_plus_continua : PLUSPLUS SEMMICOLON
+						  | PLUSPLUS'''
+	global contador_cuadruplo
+	identificador = pila_operandos.pop()
+	for aux in Name_tipos:
+		if identificador[0] == aux:
+			tipo = Name_tipos[aux]
+	resultado = temporales.pop()
+	cuadruplo.append(['+', identificador[0], '1', resultado])
+	pila_operandos.append(identificador)
+	pila_operandos.append([resultado, tipo])
+	contador_cuadruplo += 1
+	dic_tipos[resultado] = tipo
+	if identificador[0] not in var_for:
+		cuadruplo.append(['=', resultado, ' ', identificador[0]])
+		contador_cuadruplo += 1
+
+def p_minus_minus(p):
+	'''minus_minus : id minus_minus_continua'''
+
+def p_minus_minus_continua(p):
+	'''minus_minus_continua : MINUSMINUS SEMMICOLON'''
+	global contador_cuadruplo
+	identificador = pila_operandos.pop()
+	for aux in Name_tipos:
+		if identificador[0] == aux:
+			tipo = Name_tipos[aux]
+	resultado = temporales.pop()
+	cuadruplo.append(['-', identificador[0], '1', resultado])
+	pila_operandos.append(identificador)
+	pila_operandos.append([resultado, tipo])
+	contador_cuadruplo += 1
+	dic_tipos[resultado] = tipo
+	if identificador[0] not in var_for:
+		cuadruplo.append(['=', resultado, ' ', identificador[0]])
+		contador_cuadruplo += 1
 
 def p_ret_process(p):
 	'''ret_process : RETURN SEMMICOLON'''
 	cuadruplo.append(['retorno', ' ', ' ', ' '])
+
 
 def p_print_process(p):
 	'''print_process : PRINT LPAREN print_1 RPAREN SEMMICOLON'''
@@ -544,25 +612,27 @@ def p_read_process(p):
 	'''read_process : READ LPAREN sexp RPAREN SEMMICOLON'''
 	global contador_cuadruplo
 	cuadruplo.append(['read', ' ', ' ', pila_operandos.pop()[0]])
+	contador_cuadruplo += 1
 
 def p_id_asignacion(p):
 	'''id_asignacion : id id_asignacion_prima'''
 
 def p_id_asignacion_prima(p):
 	'''id_asignacion_prima : ASSIGN sexp SEMMICOLON
-						   | LSQUARE expression RSQUARE ASSIGN sexp SEMMICOLON
-					 	   | LSQUARE expression RSQUARE LSQUARE expression RSQUARE ASSIGN sexp SEMMICOLON'''
+						   | LSQUARE sexp RSQUARE ASSIGN sexp SEMMICOLON
+						   | LSQUARE sexp RSQUARE LSQUARE sexp RSQUARE ASSIGN sexp SEMMICOLON'''
+	
 	global contador_cuadruplo
 	cuadruplo.append(['=', pila_operandos.pop()[0], ' ', pila_operandos.pop()[0]])
 	contador_cuadruplo += 1
 
 #Ciclo for
 def p_ciclo_for(p):
-	'''ciclo_for : FOR LPAREN id ASSIGN sexp ciclo_for_1 SEMMICOLON sexp ciclo_for_2 SEMMICOLON id ASSIGN sexp RPAREN LKEY estatuto RKEY ciclo_for_3'''
-
+	'''ciclo_for : FOR LPAREN id ASSIGN sexp ciclo_for_1 SEMMICOLON sexp ciclo_for_2 SEMMICOLON estatuto RPAREN LKEY estatuto RKEY ciclo_for_3'''
 
 def p_ciclo_for_1(p):
 	'''ciclo_for_1 : '''
+	var_for[pila_operandos[-2]] = 0
 	cuenta = pila_operandos.pop()
 	identificador = pila_operandos.pop()
 	if (identificador[0] in Name):
@@ -580,10 +650,10 @@ def p_ciclo_for_2(p):
 def p_ciclo_for_3(p):
 	'''ciclo_for_3 : '''
 	global pila_saltos
-	fin = pila_saltos.pop()
 	cuenta = pila_operandos.pop()
 	identificador = pila_operandos.pop()
 	cuadruplo.append(['=', cuenta[0], ' ', identificador[0]])
+	fin = pila_saltos.pop()
 	cuadruplo[fin] = [cuadruplo[fin][0], cuadruplo[fin][1], ' ', len(cuadruplo) + 1]
 	cuadruplo.append(['goto', ' ', ' ', fin - 1])
 
@@ -784,6 +854,7 @@ def p_cuadruplo_3(p):
 						if operando2[0] == index2:
 							pila_operandos.append([index, Name_tipos[index2]])
 							operando2 = pila_operandos.pop()
+
 			tipo = reglas.get((operando2[1], operador, operando1[1]), 'Error')
 			if tipo != 'Error':
 				resultado = temporales.pop()
@@ -804,7 +875,6 @@ def p_cuadruplo_3(p):
 			else:
 				print('Error2')
 				exit(1)
-
 
 def p_expp(p): 
     '''expp : PLUS push_operator exp
@@ -827,14 +897,15 @@ def p_cuadruplo_4(p):
     			if operando1[0] == index:
     				for index2 in Name_tipos:
 						if operando1[0] == index2:
-							pila_operandos.append([Name[index], Name_tipos[index2]])
+							pila_operandos.append([index, Name_tipos[index2]])
 							operando1 = pila_operandos.pop()
 			for index in Name:
 				if operando2[0] == index:
 					for index2 in Name_tipos:
 						if operando2[0] == index2:
-							pila_operandos.append([Name[index], Name_tipos[index2]])
+							pila_operandos.append([index, Name_tipos[index2]])
 							operando2 = pila_operandos.pop()
+    		
     		tipo = reglas.get((operando2[1], operador, operando1[1]), 'Error')
     		if tipo != 'Error':
 				resultado = temporales.pop()
@@ -896,29 +967,43 @@ def p_float_type(p):
 def p_string_type(p):
 	'''string_type : CTES'''
 	global pila_operandos
-	global variables_string
 	pila_operandos.append([p[1]])
-	variables_string = True
+	Name_string[p[1]] = 'string'
 
 def p_id(p): 
     '''id : ID idp'''
     global pila_operandos
-    pila_operandos.append(p[1])
+    if (p[1] in Name):
+    	pila_operandos.append([p[1], Name_tipos[p[1]]])
+    else:
+    	pila_operandos.append(p[1])
 
 
 def p_idp(p):
-	'''idp : LPAREN RPAREN
+	'''idp : LSQUARE sexp RSQUARE
+		   | array_2d
+		   | LPAREN RPAREN
 		   | empty'''
 	global Name_Functions
-	global pila_ejecucion
-	if (p[1] == '('):
+	if (p[1] == '['):
+		aux = pila_operandos.pop()
+		if (p[-1] >= arreglos_len[p[-1]]['size']):
+			print('Error. Ha ocurrido un Overflow')
+			exit(1)
+		else:
+			print('hola')
+
+	elif (p[1] == '('):
 		if (p[-1] in Name_Functions):
+			pila_retorno.insert(0, len(cuadruplo))
 			salto = Name_Functions[p[-1]]
 			cuadruplo.append(['gotoFun', ' ', ' ', str(salto)])
-			pila_ejecucion.append(len(cuadruplo))
 		else:
 			print('Error. Funcion ' + p[-1] + ' no declarada previamente')
 			exit(1)
+
+def p_array_2d(p):
+	'''array_2d : LSQUARE sexp RSQUARE LSQUARE sexp RSQUARE'''
 
 def p_empty(p):
 	'''empty :'''
@@ -927,12 +1012,14 @@ def p_empty(p):
 def p_error(p):
     if p: 
         print("Syntax error at '%s'" % p.value)
+        exit(1)
     else:
         print("Syntax error at EOF")
+        exit(1)
 
 parser = yacc.yacc()
 
-archi = open('/Users/gerardogutierrez/Documents/ITESM/7 Semestre/Lenguajes y traductores/Traductor/Pruebas/test2.txt','r')
+archi = open('/Users/gerardogutierrez/Documents/ITESM/7 Semestre/Lenguajes y traductores/Traductor/Pruebas/test7.txt','r')
 text = archi.read()
 parser.parse(text)
 archi.close()

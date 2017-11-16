@@ -1,0 +1,11 @@
+program prueba
+
+int a = 10;
+
+main(){
+	print(a);
+	print("hola");
+	a--;
+	print(b);
+}
+.
