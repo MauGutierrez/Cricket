@@ -21,10 +21,10 @@ dic_tipos 			= {}
 var_for				= {}
 pila_retorno		= []
 arreglos_len 		= {}
-arreglos_resolv		= []
 matriz_de_matrices  = []
-pila_matrices 		= []
 pila_matrices_op	= []
+pila_matrices 		= []
+valor_asignado		= []
 aux_variable1		= None
 aux_variable2		= None
 print_type			= 0
@@ -210,17 +210,22 @@ def p_programa(p):
 						for index in range(len(pila_matrices)):
 							if (aux[3] in pila_matrices[index]):
 								val = pila_matrices[index][1]
-								break
+								
 						for index in range(len(pila_matrices)):
 							if (aux[3] in pila_matrices[index]):
 								lugar_1 = pila_matrices[index][0]
-								break
+								
 						for index in range(len(pila_matrices)):
 							if (aux[3] in pila_matrices[index]):
 								pila_matrices[index].append(aux[1])
 								lugar_2 = pila_matrices[index][3]
-								break
-						pila_matrices.insert(0, [lugar_1, val, aux[3], lugar_2+1])
+								lugar_aux = lugar_2+1
+								if (lugar_aux == arreglos_len[aux[3]]['size']):
+									lugar_aux = 0
+
+						if (lugar_aux > 0):		
+							pila_matrices.insert(len(pila_matrices)-1, [lugar_1, val, aux[3], lugar_aux])	
+
 					posicion_matriz = pila_matrices.pop()
 					if (posicion_matriz[1] == 'T1' or posicion_matriz[1] == 'T2' or posicion_matriz[1] == 'T3' or posicion_matriz[1] == 'T4' or posicion_matriz[1] == 'T5' or posicion_matriz[1] == 'T6' or
 						posicion_matriz[1] == 'T7' or posicion_matriz[1] == 'T8' or posicion_matriz[1] == 'T9' or posicion_matriz[1] == 'T10' or posicion_matriz[1] == 'T11' or posicion_matriz[1] == 'T12' or
@@ -230,13 +235,40 @@ def p_programa(p):
 
 					elif (posicion_matriz[1] in Name):
 						posicion_matriz[1] = int(float(Name[posicion_matriz[1]]))
-
+					
 					if (var_for):
 						matriz_de_matrices[posicion_matriz[0]][posicion_matriz[3]] = posicion_matriz[1]
 					else:
 						matriz_de_matrices[posicion_matriz[0]][int(float(aux[1]))] = posicion_matriz[1]
 
 				else:
+					if (aux[1] in arreglos_len):
+						if (arreglos_len[aux[1]]['dim'] == 2):
+							posicion = arreglos_len[aux[1]]['size_1']
+							pop1 = valor_asignado.pop()
+							if (pop1[0][0] in Name):
+								val_1 = Name[pop1[0][0]]
+							else:
+								val_1 = pop[0][0]
+
+							if (pop1[1][0] in Name):
+								val_2 = Name[pop1[1][0]]
+							else:
+								val_2 = pop[1][0]
+							valor_asignado.insert(0, pop1)
+							direccion = posicion*int(val_1)+int(val_2)
+							Name[aux[3]] = matriz_de_matrices[posicion][direccion]
+
+						elif arreglos_len[aux[1]]['dim'] == 1:
+							posicion = arreglos_len[aux[1]]['mem_dir']
+							pop1 = valor_asignado.pop()
+							if pop1[0][0] in Name:
+								direccion = Name[pop1[0][0]]
+							else:
+								direccion = pop1[0][0]
+							valor_asignado.insert(0, pop1)
+							Name[aux[3]] = matriz_de_matrices[posicion][int(direccion)]
+
 					for index1 in Name:
 						if (aux[3] == index1):
 							continua = True
@@ -246,7 +278,7 @@ def p_programa(p):
 					if (not continua):
 						print('Error. Variable ' + aux[3] + ' no declarada previamente')
 						exit(1)
-					else:
+					elif (continua and aux[1] not in arreglos_len):
 						Name[aux[3]] = variable1
 
 			elif (aux[index] == 'print'):
@@ -602,7 +634,8 @@ def p_minus_minus(p):
 	'''minus_minus : id minus_minus_continua'''
 
 def p_minus_minus_continua(p):
-	'''minus_minus_continua : MINUSMINUS SEMMICOLON'''
+	'''minus_minus_continua : MINUSMINUS SEMMICOLON
+						    | MINUSMINUS'''
 	global contador_cuadruplo
 	identificador = pila_operandos.pop()
 	for aux in Name_tipos:
@@ -662,62 +695,73 @@ def p_read_process(p):
 	contador_cuadruplo += 1
 
 def p_id_asignacion(p):
-	'''id_asignacion : id id_asignacion_prima'''
+	'''id_asignacion : id_asignacion_prima
+					 | id_vector'''
+
+def p_id_vector(p):
+	'''id_vector : ID LSQUARE sexp RSQUARE ASSIGN sexp SEMMICOLON
+				 | ID LSQUARE sexp RSQUARE LSQUARE sexp RSQUARE ASSIGN sexp SEMMICOLON'''
+	aux = pila_operandos.pop()
+	if (aux[0] == 'T1' or aux[0] == 'T2' or aux[0] == 'T3' or aux[0] == 'T4' or aux[0] == 'T5' or aux[0] == 'T6' or
+				aux[0] == 'T7' or aux[0] == 'T8' or aux[0] == 'T9' or aux[0] == 'T10' or aux[0] == 'T11' or aux[0] == 'T12' or 
+				aux[0] == 'T13' or aux[0] == 'T14' or aux[0] == 'T15' or aux[0] == 'T16' or aux[0] == 'T17' or aux[0] == 'T18' or
+				aux[0] == 'T19' or aux[0] == 'T20'):
+		var = aux[0]
+	elif aux[0] not in Name:
+		var = int(float(aux[0]))
+	else:
+		var = aux[0]
+
+	if (arreglos_len[p[1]]['dim'] == 1):
+		op1 = pila_operandos.pop()
+		
+		if (op1[0] in Name):
+			op1[0] = Name[op1[0]]
+
+		cuadruplo.append(['res_matriz', ' ', ' ', ' '])
+		cuadruplo.append(['=', op1[0], ' ', p[1]])
+		posicion_arreglo = arreglos_len[p[1]]['mem_dir']
+		pila_matrices.insert(0, [posicion_arreglo, var, p[1]])
+	
+	elif (arreglos_len[p[1]]['dim'] == 2):
+		op1 = pila_operandos.pop()
+		op2 = pila_operandos.pop()
+
+		if (op1[0] in Name):
+			op1[0] = Name[op1[0]]
+		if (op2[0] in Name):
+			op2[0] = Name[op2[0]]
+
+		if (op2[0] > 0):
+			lugar = int(float(arreglos_len[p[1]]['size_1']))*int(float(op2[0])) + int(float(op1[0]))
+		else:
+			lugar = int(float(op2[0])) + int(float(op1[0]))
+
+		cuadruplo.append(['res_matriz', ' ', ' ', ' '])
+		cuadruplo.append(['=', lugar, ' ', p[1]])
+		posicion_arreglo = arreglos_len[p[1]]['mem_dir']
+		pila_matrices.insert(0, [posicion_arreglo, var, p[1]])
+
 
 def p_id_asignacion_prima(p):
-	'''id_asignacion_prima : ASSIGN sexp SEMMICOLON
-						   | LSQUARE sexp RSQUARE ASSIGN sexp SEMMICOLON
-						   | LSQUARE sexp RSQUARE LSQUARE sexp RSQUARE ASSIGN sexp SEMMICOLON'''
+	'''id_asignacion_prima : id ASSIGN sexp SEMMICOLON'''
 	
 	global contador_cuadruplo
-	if (pila_matrices_op):
-		aux = pila_operandos.pop()
-		if (aux[0] == 'T1' or aux[0] == 'T2' or aux[0] == 'T3' or aux[0] == 'T4' or aux[0] == 'T5' or aux[0] == 'T6' or
-					aux[0] == 'T7' or aux[0] == 'T8' or aux[0] == 'T9' or aux[0] == 'T10' or aux[0] == 'T11' or aux[0] == 'T12' or 
-					aux[0] == 'T13' or aux[0] == 'T14' or aux[0] == 'T15' or aux[0] == 'T16' or aux[0] == 'T17' or aux[0] == 'T18' or
-					aux[0] == 'T19' or aux[0] == 'T20'):
-			var = aux[0]
-		elif aux[0] not in Name:
-			var = int(float(aux[0]))
-		else:
-			var = aux[0]
-
-		op1 = pila_operandos[-1]
-		if (arreglos_len[op1[0]]['dim'] == 1):
-			op1 = pila_operandos.pop()
-			op2 = pila_operandos.pop()
-			
-			if (op2[0] in Name):
-				op2[0] = Name[op2[0]]
-
-			cuadruplo.append(['res_matriz', ' ', ' ', ' '])
-			cuadruplo.append(['=', op2[0], ' ', op1[0]])
-			posicion_arreglo = arreglos_len[op1[0]]['mem_dir']
-			pila_matrices.insert(0, [posicion_arreglo, var, op1[0]])
-			arreglos_resolv.insert(0, op1[0])
-		
-		elif (arreglos_len[op1[0]]['dim'] == 2):
-			
+	if (pila_operandos[-1][0] in arreglos_len):
+		if (arreglos_len[pila_operandos[-1][0]]['dim'] == 2):
 			op1 = pila_operandos.pop()
 			op2 = pila_operandos.pop()
 			op3 = pila_operandos.pop()
+			op4 = pila_operandos.pop()
+			cuadruplo.append(['=', op1[0], ' ', op4[0]])
+			valor_asignado.append([op2, op3])
+		elif (arreglos_len[pila_operandos[-1][0]]['dim'] == 1):
+			op1 = pila_operandos.pop()
+			op2 = pila_operandos.pop()
+			op3 = pila_operandos.pop()
+			cuadruplo.append(['=', op1[0], ' ', op3[0]])
+			valor_asignado.insert(0, [op2])
 
-			if (op2[0] in Name):
-				op2[0] = Name[op2[0]]
-			if (op3[0] in Name):
-				op3[0] = Name[op3[0]]
-
-			if (op3[0] > 0):
-				lugar = int(float(arreglos_len[op1[0]]['size_1']))*int(float(op3[0])) + int(float(op2[0]))
-			else:
-				lugar = int(float(op3[0])) + int(float(op2[0]))
-
-			cuadruplo.append(['res_matriz', ' ', ' ', ' '])
-			cuadruplo.append(['=', lugar, ' ', op1[0]])
-			posicion_arreglo = arreglos_len[op1[0]]['mem_dir']
-			pila_matrices.insert(0, [posicion_arreglo, var, op1[0]])
-			arreglos_resolv.insert(0, op1[0])
-	
 	else:
 		cuadruplo.append(['=', pila_operandos.pop()[0], ' ', pila_operandos.pop()[0]])
 		contador_cuadruplo += 1
@@ -951,7 +995,7 @@ def p_cuadruplo_3(p):
 							pila_operandos.append([index, Name_tipos[index2]])
 							operando2 = pila_operandos.pop()
 
-			tipo = reglas.get((operando2[1], operador, operando1[1]), 'Error')
+			tipo = reglas.get((operando2[1], operador, operando1[1]), 'Error')	
 			if tipo != 'Error':
 				resultado = temporales.pop()
 				cuadruplo.append([operador, operando2[0], operando1[0], resultado])
@@ -1090,8 +1134,6 @@ def p_idp(p):
 		if (val >= int(float(arreglos_len[p[-1]]['size']))):
 			print('Error. Ha ocurrido un Overflow')
 			exit(1)
-		else:
-			pila_matrices_op.append(p[1])
 
 	elif (p[1] == '('):
 		if (p[-1] in Name_Functions):
@@ -1122,10 +1164,7 @@ def p_array_2d(p):
 		exit(1)
 	if (val_2 >= int(float(arreglos_len[p[-1]]['size_2']))):
 		print('Error. Ha ocurrido un Overflow')
-		exit(1)
-	else:
-		pila_matrices_op.append(p[1])
-		
+		exit(1)	
 
 def p_empty(p):
 	'''empty :'''
