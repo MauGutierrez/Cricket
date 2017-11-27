@@ -1,0 +1,23 @@
+program prueba
+
+int dim1 = 10, dim2 = 10, dim3 = 10;
+arrint a[dim1], b[dim2], c[dim3];
+int i, j, cont_1, cont_2, aux = 0;
+
+main(){
+	for (i = 10; i >= 0; i = i - 1){
+		a[i] = 10 - i;
+	}
+	print(a);
+	for (i = 0; i < 9; i = i + 1){
+		for (j = i + 1; j < 10; j = j + 1){
+			cont_1 = a[i];
+			cont_2 = a[j];
+			if (cont_1 > cont_2){
+				a[i] = cont_2;
+				a[j] = cont_1;
+			}
+		}
+	}
+	print(a);
+}

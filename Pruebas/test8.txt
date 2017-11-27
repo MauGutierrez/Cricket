@@ -1,0 +1,22 @@
+program prueba
+
+int dim1 = 10, dim2 = 10, dim3 = 10;
+arrint a[dim1], b[dim2], c[dim3];
+int i, j, cont_1, cont_2, aux;
+
+main(){
+	for (i = 0; i < 10; i = i + 1){
+		a[i] = i;
+	}
+	for (i = 0; i < 10; i = i + 1){
+		b[i] = i;
+	}
+	for (i = 0; i < 10; i = i + 1){
+		cont_1 = a[i];
+		cont_2 = b[i];
+		c[i] = cont_1 + cont_2;
+	}
+	print(a);
+	print(b);
+	print(c);
+}

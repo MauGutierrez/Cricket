@@ -49,4 +49,7 @@ reglas = {
 	('bool', '>=', 'bool') : 'bool',
 	('bool', '==', 'bool') : 'bool',
 	('bool', '!=', 'bool') : 'bool',
+
+	('array', '+', 'array') : 'array',
+	('array', '*', 'array') : 'array',
 }

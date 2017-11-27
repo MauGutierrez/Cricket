@@ -18,7 +18,7 @@ reserved = {
 
 tokens = ['NEQ', 'EQ', 'GTEQ', 'LTEQ', 'AND', 'OR', 'ID', 'NUMINT', 'NUMFLOAT', 'CTES','SEMMICOLON',
 		  'RPAREN', 'LPAREN', 'RSQUARE', 'LSQUARE', 'RKEY', 'LKEY', 'LT', 'GT', 'PLUS', 'MINUS', 'TIMES',
-		  'DIVISION', 'ASSIGN', 'COMMA', 'PLUSPLUS', 'MINUSMINUS'] + list(reserved.values())
+		  'DIVISION', 'ASSIGN', 'COMMA'] + list(reserved.values())
 
 #tokens
 t_ignore 		= ' \t'
@@ -38,8 +38,6 @@ t_DIVISION 		= r'/'				#Division
 t_ASSIGN 		= r'='				#Asignacion valor
 t_LT 			= r'<'				#Menor a
 t_GT 			= r'>'				#Mayor a
-t_PLUSPLUS		= r'\+\+'
-t_MINUSMINUS	= r'--'
 t_LPAREN 		= r'\('				
 t_RPAREN		= r'\)'
 t_LSQUARE 		= r'\['
