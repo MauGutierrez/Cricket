@@ -1141,7 +1141,7 @@ def p_error(p):
 
 parser = yacc.yacc()
 
-archi = open('/Users/gerardogutierrez/Documents/ITESM/7 Semestre/Lenguajes y traductores/Traductor/Pruebas/test7.txt','r')
+archi = open('/doc-name.txt','r')
 text = archi.read()
 parser.parse(text)
 archi.close()
